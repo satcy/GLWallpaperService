@@ -28,6 +28,8 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
+import processing.opengl.PGL;
+
 import net.rbgrn.android.glwallpaperservice.BaseConfigChooser.ComponentSizeChooser;
 import net.rbgrn.android.glwallpaperservice.BaseConfigChooser.SimpleEGLConfigChooser;
 import android.opengl.GLSurfaceView;
@@ -119,7 +121,7 @@ public class GLWallpaperService extends WallpaperService {
 			return mDebugFlags;
 		}
 
-		public void setRenderer(Renderer renderer) {
+		public void setRenderer(PGL.AndroidRenderer renderer renderer) {
 			checkRenderThreadState();
 			if (mEGLConfigChooser == null) {
 				mEGLConfigChooser = new SimpleEGLConfigChooser(true);
@@ -246,7 +248,7 @@ interface EGLContextFactory {
 class DefaultContextFactory implements EGLContextFactory {
 
 	public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config) {
-		return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, null);
+		return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, new int[] { 0x3098, 2, EGL10.EGL_NONE });
 	}
 
 	public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context) {
@@ -494,11 +496,11 @@ class GLThread extends Thread {
 	private boolean mEventsWaiting;
 	// End of member variables protected by the sGLThreadManager monitor.
 
-	private GLWallpaperService.Renderer mRenderer;
+	private PGL.AndroidRenderer mRenderer;
 	private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
 	private EglHelper mEglHelper;
 
-	GLThread(GLWallpaperService.Renderer renderer, EGLConfigChooser chooser, EGLContextFactory contextFactory,
+	GLThread(PGL.AndroidRenderer renderer, EGLConfigChooser chooser, EGLContextFactory contextFactory,
 			EGLWindowSurfaceFactory surfaceFactory, GLWrapper wrapper) {
 		super();
 		mDone = false;
@@ -872,7 +874,7 @@ abstract class BaseConfigChooser implements EGLConfigChooser {
 				int stencilSize) {
 			super(new int[] { EGL10.EGL_RED_SIZE, redSize, EGL10.EGL_GREEN_SIZE, greenSize, EGL10.EGL_BLUE_SIZE,
 					blueSize, EGL10.EGL_ALPHA_SIZE, alphaSize, EGL10.EGL_DEPTH_SIZE, depthSize, EGL10.EGL_STENCIL_SIZE,
-					stencilSize, EGL10.EGL_NONE });
+					stencilSize, EGL10.EGL_RENDERABLE_TYPE, 4, EGL10.EGL_NONE });
 			mValue = new int[1];
 			mRedSize = redSize;
 			mGreenSize = greenSize;
